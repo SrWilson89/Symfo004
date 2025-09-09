@@ -1,0 +1,634 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Subir Nuevo Meme - {{ parent() }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .upload-container {
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .upload-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .upload-header h1 {
+            color: #1f2937;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .upload-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: #374151;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.15s ease-in-out;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-control.is-invalid {
+            border-color: #ef4444;
+        }
+        
+        .invalid-feedback {
+            display: block;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #ef4444;
+        }
+        
+        .file-upload-area {
+            position: relative;
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #f9fafb, #ffffff);
+            cursor: pointer;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+            transform: scale(1.02);
+        }
+        
+        .file-upload-area.has-file {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+        
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            color: #9ca3af;
+        }
+        
+        .upload-text {
+            color: #6b7280;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-hint {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+        
+        .file-preview {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        
+        .file-preview.active {
+            display: block;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .file-thumbnail {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .file-details h4 {
+            margin: 0 0 0.25rem 0;
+            color: #1f2937;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .file-details p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 0.8rem;
+        }
+        
+        .file-remove {
+            margin-left: auto;
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+        
+        .file-remove:hover {
+            background: #dc2626;
+        }
+        
+        .textarea-group {
+            position: relative;
+        }
+        
+        .char-counter {
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.75rem;
+            font-size: 0.75rem;
+            color: #9ca3af;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.25rem;
+            border-radius: 4px;
+        }
+        
+        .char-counter.warning {
+            color: #f59e0b;
+        }
+        
+        .char-counter.danger {
+            color: #ef4444;
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+            padding-bottom: 2rem;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .upload-tips {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .upload-tips h3 {
+            color: #0369a1;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .upload-tips ul {
+            margin: 0;
+            padding-left: 1.2rem;
+            color: #0284c7;
+            font-size: 0.8rem;
+        }
+        
+        .upload-tips li {
+            margin-bottom: 0.25rem;
+        }
+        
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .alert-success {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .alert-danger {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .upload-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            
+            .file-upload-area {
+                padding: 1.5rem;
+                min-height: 150px;
+            }
+            
+            .upload-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="upload-container">
+    <div class="upload-header">
+        <h1>Subir Nuevo Meme</h1>
+        <p class="upload-subtitle">Comparte tu meme favorito con la comunidad</p>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success" role="alert">{{ message }}</div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger" role="alert">{{ message }}</div>
+    {% endfor %}
+
+    {{ form_start(form, {
+        'attr': {
+            'novalidate': 'novalidate',
+            'id': 'meme-upload-form',
+            'enctype': 'multipart/form-data'
+        }
+    }) }}
+
+    <div class="form-group">
+        {{ form_label(form.titulo, 'Título del Meme', {
+            'label_attr': {'class': 'form-label'}
+        }) }}
+        {{ form_widget(form.titulo, {
+            'attr': {
+                'class': 'form-control',
+                'placeholder': 'Un título divertido para tu meme...',
+                'maxlength': '100'
+            }
+        }) }}
+        {{ form_errors(form.titulo, {'attr': {'class': 'invalid-feedback'}}) }}
+        <div class="char-counter" id="titulo-counter">0/100</div>
+    </div>
+
+    <div class="form-group">
+        <div class="textarea-group">
+            {{ form_label(form.descripcion, 'Descripción (Opcional)', {
+                'label_attr': {'class': 'form-label'}
+            }) }}
+            {{ form_widget(form.descripcion, {
+                'attr': {
+                    'class': 'form-control form-textarea',
+                    'placeholder': 'Describe tu meme, añade contexto o cuéntanos por qué es divertido...',
+                    'maxlength': '500'
+                }
+            }) }}
+            {{ form_errors(form.descripcion, {'attr': {'class': 'invalid-feedback'}}) }}
+            <div class="char-counter" id="descripcion-counter">0/500</div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.imagen, 'Imagen del Meme', {
+            'label_attr': {'class': 'form-label'}
+        }) }}
+        
+        <div class="file-upload-area" id="file-upload-area">
+            {{ form_widget(form.imagen, {
+                'attr': {
+                    'class': 'file-input',
+                    'accept': 'image/*'
+                }
+            }) }}
+            
+            <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"></path>
+            </svg>
+            
+            <div class="upload-text">Arrastra tu imagen aquí o haz clic para seleccionar</div>
+            <div class="upload-hint">PNG, JPG, GIF hasta 10MB</div>
+        </div>
+        
+        <div class="file-preview" id="file-preview">
+            <div class="file-info">
+                <img class="file-thumbnail" id="file-thumbnail" src="" alt="Preview">
+                <div class="file-details">
+                    <h4 id="file-name">nombre_archivo.jpg</h4>
+                    <p id="file-size">2.3 MB</p>
+                    <p id="file-dimensions">1200 × 800 píxeles</p>
+                </div>
+                <button type="button" class="file-remove" id="file-remove">Quitar</button>
+            </div>
+        </div>
+        
+        <div class="progress-bar" id="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        
+        {{ form_errors(form.imagen, {'attr': {'class': 'invalid-feedback'}}) }}
+    </div>
+
+    <button type="submit" class="btn-primary" id="submit-btn" disabled>
+        <span class="loading-spinner" id="loading-spinner"></span>
+        <span id="btn-text">Subir Meme</span>
+    </button>
+
+    {{ form_end(form) }}
+
+    <div class="upload-tips">
+        <h3>💡 Consejos para un meme exitoso</h3>
+        <ul>
+            <li>Usa imágenes de alta calidad y bien iluminadas</li>
+            <li>Asegúrate de que el texto sea legible</li>
+            <li>Los memes actuales y relevantes funcionan mejor</li>
+            <li>Mantén el título corto pero descriptivo</li>
+            <li>Verifica que no contenga contenido ofensivo</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('meme-upload-form');
+            const fileInput = form.querySelector('input[type="file"]');
+            const fileUploadArea = document.getElementById('file-upload-area');
+            const filePreview = document.getElementById('file-preview');
+            const fileThumbnail = document.getElementById('file-thumbnail');
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+            const fileDimensions = document.getElementById('file-dimensions');
+            const fileRemove = document.getElementById('file-remove');
+            const submitBtn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const progressBar = document.getElementById('progress-bar');
+            const progressFill = document.getElementById('progress-fill');
+            
+            // Campos de texto
+            const tituloField = form.querySelector('input[name*="titulo"]');
+            const descripcionField = form.querySelector('textarea[name*="descripcion"]');
+            const tituloCounter = document.getElementById('titulo-counter');
+            const descripcionCounter = document.getElementById('descripcion-counter');
+
+            let selectedFile = null;
+
+            // Contadores de caracteres
+            function updateCharCounter(field, counter, maxLength) {
+                const current = field.value.length;
+                counter.textContent = `${current}/${maxLength}`;
+                counter.className = 'char-counter';
+                
+                if (current > maxLength * 0.9) {
+                    counter.classList.add('warning');
+                }
+                if (current > maxLength * 0.95) {
+                    counter.classList.add('danger');
+                }
+            }
+
+            function validateForm() {
+                const hasTitle = tituloField.value.trim().length > 0;
+                const hasFile = selectedFile !== null;
+                
+                submitBtn.disabled = !(hasTitle && hasFile);
+            }
+
+            // Event listeners para contadores
+            if (tituloField && tituloCounter) {
+                tituloField.addEventListener('input', function() {
+                    updateCharCounter(this, tituloCounter, 100);
+                    validateForm();
+                });
+                updateCharCounter(tituloField, tituloCounter, 100);
+            }
+
+            if (descripcionField && descripcionCounter) {
+                descripcionField.addEventListener('input', function() {
+                    updateCharCounter(this, descripcionCounter, 500);
+                });
+                updateCharCounter(descripcionField, descripcionCounter, 500);
+            }
+
+            // Funciones de manejo de archivos
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            function getImageDimensions(file) {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = function() {
+                        resolve({ width: this.naturalWidth, height: this.naturalHeight });
+                    };
+                    img.src = URL.createObjectURL(file);
+                });
+            }
+
+            function showFilePreview(file) {
+                selectedFile = file;
+                
+                // Mostrar preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    fileThumbnail.src = e.target.result;
+                    fileName.textContent = file.name;
+                    fileSize.textContent = formatFileSize(file.size);
+                    
+                    getImageDimensions(file).then(dimensions => {
+                        fileDimensions.textContent = `${dimensions.width} × ${dimensions.height} píxeles`;
+                    });
+                    
+                    filePreview.classList.add('active');
+                    fileUploadArea.classList.add('has-file');
+                };
+                reader.readAsDataURL(file);
+                
+                validateForm();
+            }
+
+            function removeFile() {
+                selectedFile = null;
+                fileInput.value = '';
+                filePreview.classList.remove('active');
+                fileUploadArea.classList.remove('has-file');
+                validateForm();
+            }
+
+            // Event listeners para drag & drop
+            fileUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            fileUploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+
+            fileUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type.startsWith('image/')) {
+                        fileInput.files = files;
+                        showFilePreview(file);
+                    }
+                }
+            });
+
+            // Event listener para selección de archivo
+            fileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    showFilePreview(this.files[0]);
+                }
+            });
+
+            // Event listener para quitar archivo
+            fileRemove.addEventListener('click', removeFile);
+
+            // Event listener para envío del formulario
+            form.addEventListener('submit', function(e) {
+                if (submitBtn.disabled) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                submitBtn.disabled = true;
+                btnText.textContent = 'Subiendo...';
+                loadingSpinner.style.display = 'block';
+                progressBar.style.display = 'block';
+                
+                // Simular progreso (en una implementación real, esto vendría del servidor)
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 15;
+                    if (progress > 90) progress = 90;
+                    progressFill.style.width = progress + '%';
+                    
+                    if (progress >= 90) {
+                        clearInterval(interval);
+                    }
+                }, 200);
+            });
+
+            // Validación inicial
+            validateForm();
+        });
+    </script>
+{% endblock %}

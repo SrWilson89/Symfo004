@@ -1,0 +1,408 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Crear cuenta - {{ parent() }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .registration-container {
+            max-width: 450px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .registration-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .registration-header h1 {
+            color: #1f2937;
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .registration-subtitle {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-control.is-invalid {
+            border-color: #ef4444;
+        }
+        
+        .form-control.is-valid {
+            border-color: #10b981;
+        }
+        
+        .invalid-feedback {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: #ef4444;
+        }
+        
+        .valid-feedback {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: #10b981;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .checkbox-input {
+            margin: 0;
+            transform: scale(1.2);
+        }
+        
+        .checkbox-label {
+            color: #374151;
+            font-size: 0.875rem;
+            line-height: 1.4;
+            margin: 0;
+        }
+        
+        .checkbox-label a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .checkbox-label a:hover {
+            text-decoration: underline;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #2563eb;
+        }
+        
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+        
+        .alert-danger {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .login-link a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .password-strength {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            display: none;
+        }
+        
+        .password-strength.weak {
+            background: #fef2f2;
+            color: #dc2626;
+            display: block;
+        }
+        
+        .password-strength.medium {
+            background: #fefce8;
+            color: #d97706;
+            display: block;
+        }
+        
+        .password-strength.strong {
+            background: #f0fdf4;
+            color: #16a34a;
+            display: block;
+        }
+        
+        .password-requirements {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .password-requirements ul {
+            margin: 0.25rem 0 0 1rem;
+            padding: 0;
+        }
+        
+        .password-requirements li {
+            margin-bottom: 0.125rem;
+        }
+        
+        .requirement-met {
+            color: #16a34a;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="registration-container">
+    <div class="registration-header">
+        <h1>Crear cuenta</h1>
+        <p class="registration-subtitle">Únete y comienza tu experiencia</p>
+    </div>
+
+    {% for flash_error in app.flashes('verify_email_error') %}
+        <div class="alert alert-danger" role="alert">
+            <strong>Error:</strong> {{ flash_error }}
+        </div>
+    {% endfor %}
+
+    {{ form_start(registrationForm, {
+        'attr': {
+            'id': 'registration-form',
+            'novalidate': 'novalidate'
+        }
+    }) }}
+
+    <div class="form-group">
+        {{ form_label(registrationForm.email, 'Correo electrónico', {
+            'label_attr': {'class': 'form-label'}
+        }) }}
+        {{ form_widget(registrationForm.email, {
+            'attr': {
+                'class': 'form-control',
+                'placeholder': 'tu@ejemplo.com',
+                'autocomplete': 'email'
+            }
+        }) }}
+        {{ form_errors(registrationForm.email, {
+            'attr': {'class': 'invalid-feedback'}
+        }) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(registrationForm.plainPassword, 'Contraseña', {
+            'label_attr': {'class': 'form-label'}
+        }) }}
+        {{ form_widget(registrationForm.plainPassword, {
+            'attr': {
+                'class': 'form-control',
+                'placeholder': '••••••••',
+                'autocomplete': 'new-password',
+                'id': 'password-field'
+            }
+        }) }}
+        
+        <div id="password-strength" class="password-strength">
+            <span id="strength-text"></span>
+        </div>
+        
+        <div class="password-requirements">
+            <p>La contraseña debe contener:</p>
+            <ul id="requirements-list">
+                <li id="req-length">Al menos 8 caracteres</li>
+                <li id="req-uppercase">Una letra mayúscula</li>
+                <li id="req-lowercase">Una letra minúscula</li>
+                <li id="req-number">Un número</li>
+            </ul>
+        </div>
+        
+        {{ form_errors(registrationForm.plainPassword, {
+            'attr': {'class': 'invalid-feedback'}
+        }) }}
+    </div>
+
+    <div class="checkbox-group">
+        {{ form_widget(registrationForm.agreeTerms, {
+            'attr': {'class': 'checkbox-input'}
+        }) }}
+        {{ form_label(registrationForm.agreeTerms, null, {
+            'label_attr': {'class': 'checkbox-label'},
+            'label_html': true,
+            'label': 'Acepto los <a href="/terminos" target="_blank">términos y condiciones</a> y la <a href="/privacidad" target="_blank">política de privacidad</a>'
+        }) }}
+        {{ form_errors(registrationForm.agreeTerms, {
+            'attr': {'class': 'invalid-feedback'}
+        }) }}
+    </div>
+
+    <button type="submit" class="btn-primary" id="submit-btn" disabled>
+        Crear cuenta
+    </button>
+
+    {{ form_end(registrationForm) }}
+
+    <div class="login-link">
+        ¿Ya tienes cuenta? <a href="{{ path('app_login') }}">Inicia sesión</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('registration-form');
+            const emailField = form.querySelector('input[type="email"]');
+            const passwordField = document.getElementById('password-field');
+            const agreeTermsField = form.querySelector('input[type="checkbox"]');
+            const submitBtn = document.getElementById('submit-btn');
+            const strengthIndicator = document.getElementById('password-strength');
+            const strengthText = document.getElementById('strength-text');
+
+            // Elementos de requisitos
+            const reqLength = document.getElementById('req-length');
+            const reqUppercase = document.getElementById('req-uppercase');
+            const reqLowercase = document.getElementById('req-lowercase');
+            const reqNumber = document.getElementById('req-number');
+
+            function validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            }
+
+            function checkPasswordStrength(password) {
+                let strength = 0;
+                const requirements = {
+                    length: password.length >= 8,
+                    uppercase: /[A-Z]/.test(password),
+                    lowercase: /[a-z]/.test(password),
+                    number: /\d/.test(password)
+                };
+
+                // Actualizar indicadores visuales
+                reqLength.className = requirements.length ? 'requirement-met' : '';
+                reqUppercase.className = requirements.uppercase ? 'requirement-met' : '';
+                reqLowercase.className = requirements.lowercase ? 'requirement-met' : '';
+                reqNumber.className = requirements.number ? 'requirement-met' : '';
+
+                // Calcular fortaleza
+                Object.values(requirements).forEach(req => {
+                    if (req) strength++;
+                });
+
+                return { strength, requirements };
+            }
+
+            function updatePasswordStrength() {
+                const password = passwordField.value;
+                if (password.length === 0) {
+                    strengthIndicator.style.display = 'none';
+                    return;
+                }
+
+                const { strength, requirements } = checkPasswordStrength(password);
+                
+                strengthIndicator.className = 'password-strength';
+                
+                if (strength < 2) {
+                    strengthIndicator.classList.add('weak');
+                    strengthText.textContent = 'Contraseña débil';
+                } else if (strength < 4) {
+                    strengthIndicator.classList.add('medium');
+                    strengthText.textContent = 'Contraseña media';
+                } else {
+                    strengthIndicator.classList.add('strong');
+                    strengthText.textContent = 'Contraseña fuerte';
+                }
+            }
+
+            function updateFormValidity() {
+                const isEmailValid = validateEmail(emailField.value);
+                const { strength } = checkPasswordStrength(passwordField.value);
+                const isPasswordValid = strength >= 4;
+                const areTermsAccepted = agreeTermsField.checked;
+
+                // Actualizar clases visuales
+                emailField.className = 'form-control';
+                passwordField.className = 'form-control';
+
+                if (emailField.value.length > 0) {
+                    emailField.classList.add(isEmailValid ? 'is-valid' : 'is-invalid');
+                }
+
+                if (passwordField.value.length > 0) {
+                    passwordField.classList.add(isPasswordValid ? 'is-valid' : 'is-invalid');
+                }
+
+                // Habilitar/deshabilitar botón
+                submitBtn.disabled = !(isEmailValid && isPasswordValid && areTermsAccepted);
+            }
+
+            // Event listeners
+            emailField.addEventListener('input', updateFormValidity);
+            passwordField.addEventListener('input', function() {
+                updatePasswordStrength();
+                updateFormValidity();
+            });
+            agreeTermsField.addEventListener('change', updateFormValidity);
+
+            // Validación inicial
+            updateFormValidity();
+        });
+    </script>
+{% endblock %}
