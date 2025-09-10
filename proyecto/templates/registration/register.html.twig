@@ -297,7 +297,8 @@
     {{ form_end(registrationForm) }}
 
     <div class="login-link">
-        ¿Ya tienes cuenta? <a href="{{ path('app_login') }}">Inicia sesión</a>
+        ¿Ya tienes cuenta?
+        <a href="{{ path('app_login') }}">Inicia sesión</a>
     </div>
 </div>
 {% endblock %}
@@ -307,10 +308,17 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('registration-form');
-            const emailField = form.querySelector('input[type="email"]');
+            if (!form) {
+                console.error('Formulario no encontrado.');
+                return;
+            }
+
+            // Selecciona los elementos por sus ID más fiables
+            const emailField = document.getElementById('registration_form_email');
             const passwordField = document.getElementById('password-field');
-            const agreeTermsField = form.querySelector('input[type="checkbox"]');
+            const agreeTermsField = document.getElementById('registration_form_agreeTerms');
             const submitBtn = document.getElementById('submit-btn');
+
             const strengthIndicator = document.getElementById('password-strength');
             const strengthText = document.getElementById('strength-text');
 
@@ -335,71 +343,81 @@
                 };
 
                 // Actualizar indicadores visuales
-                reqLength.className = requirements.length ? 'requirement-met' : '';
-                reqUppercase.className = requirements.uppercase ? 'requirement-met' : '';
-                reqLowercase.className = requirements.lowercase ? 'requirement-met' : '';
-                reqNumber.className = requirements.number ? 'requirement-met' : '';
+                if (reqLength) reqLength.className = requirements.length ? 'requirement-met' : '';
+                if (reqUppercase) reqUppercase.className = requirements.uppercase ? 'requirement-met' : '';
+                if (reqLowercase) reqLowercase.className = requirements.lowercase ? 'requirement-met' : '';
+                if (reqNumber) reqNumber.className = requirements.number ? 'requirement-met' : '';
 
                 // Calcular fortaleza
                 Object.values(requirements).forEach(req => {
                     if (req) strength++;
                 });
-
                 return { strength, requirements };
             }
 
             function updatePasswordStrength() {
+                if (!passwordField) return;
                 const password = passwordField.value;
                 if (password.length === 0) {
-                    strengthIndicator.style.display = 'none';
+                    if (strengthIndicator) strengthIndicator.style.display = 'none';
                     return;
                 }
 
                 const { strength, requirements } = checkPasswordStrength(password);
-                
-                strengthIndicator.className = 'password-strength';
-                
-                if (strength < 2) {
-                    strengthIndicator.classList.add('weak');
-                    strengthText.textContent = 'Contraseña débil';
-                } else if (strength < 4) {
-                    strengthIndicator.classList.add('medium');
-                    strengthText.textContent = 'Contraseña media';
-                } else {
-                    strengthIndicator.classList.add('strong');
-                    strengthText.textContent = 'Contraseña fuerte';
+                if (strengthIndicator) {
+                    strengthIndicator.className = 'password-strength';
+                    if (strength < 2) {
+                        strengthIndicator.classList.add('weak');
+                        strengthText.textContent = 'Contraseña débil';
+                    } else if (strength < 4) {
+                        strengthIndicator.classList.add('medium');
+                        strengthText.textContent = 'Contraseña media';
+                    } else {
+                        strengthIndicator.classList.add('strong');
+                        strengthText.textContent = 'Contraseña fuerte';
+                    }
                 }
             }
 
             function updateFormValidity() {
-                const isEmailValid = validateEmail(emailField.value);
-                const { strength } = checkPasswordStrength(passwordField.value);
+                const isEmailValid = emailField ? validateEmail(emailField.value) : false;
+                const { strength } = passwordField ? checkPasswordStrength(passwordField.value) : { strength: 0 };
                 const isPasswordValid = strength >= 4;
-                const areTermsAccepted = agreeTermsField.checked;
+                const areTermsAccepted = agreeTermsField ? agreeTermsField.checked : false;
 
                 // Actualizar clases visuales
-                emailField.className = 'form-control';
-                passwordField.className = 'form-control';
-
-                if (emailField.value.length > 0) {
-                    emailField.classList.add(isEmailValid ? 'is-valid' : 'is-invalid');
+                if (emailField) {
+                    emailField.className = 'form-control';
+                    if (emailField.value.length > 0) {
+                        emailField.classList.add(isEmailValid ? 'is-valid' : 'is-invalid');
+                    }
                 }
-
-                if (passwordField.value.length > 0) {
-                    passwordField.classList.add(isPasswordValid ? 'is-valid' : 'is-invalid');
+                if (passwordField) {
+                    passwordField.className = 'form-control';
+                    if (passwordField.value.length > 0) {
+                        passwordField.classList.add(isPasswordValid ? 'is-valid' : 'is-invalid');
+                    }
                 }
 
                 // Habilitar/deshabilitar botón
-                submitBtn.disabled = !(isEmailValid && isPasswordValid && areTermsAccepted);
+                if (submitBtn) {
+                    submitBtn.disabled = !(isEmailValid && isPasswordValid && areTermsAccepted);
+                }
             }
 
             // Event listeners
-            emailField.addEventListener('input', updateFormValidity);
-            passwordField.addEventListener('input', function() {
-                updatePasswordStrength();
-                updateFormValidity();
-            });
-            agreeTermsField.addEventListener('change', updateFormValidity);
+            if (emailField) {
+                emailField.addEventListener('input', updateFormValidity);
+            }
+            if (passwordField) {
+                passwordField.addEventListener('input', function() {
+                    updatePasswordStrength();
+                    updateFormValidity();
+                });
+            }
+            if (agreeTermsField) {
+                agreeTermsField.addEventListener('change', updateFormValidity);
+            }
 
             // Validación inicial
             updateFormValidity();

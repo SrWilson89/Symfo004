@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Moderación de Memes{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Memes Pendientes de Moderación</h1>
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+
+        {% if memes is empty %}
+            <div class="alert alert-info text-center">No hay memes pendientes de aprobación.</div>
+        {% else %}
+            <div class="row">
+                {% for meme in memes %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            <img src="{{ asset('uploads/' ~ meme.rutaImagen) }}" class="card-img-top" alt="{{ meme.titulo }}">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ meme.titulo }}</h5>
+                                <p class="card-text">{{ meme.descripcion }}</p>
+                                <hr>
+                                <a href="{{ path('app_moderation_approve', {'id': meme.id}) }}" class="btn btn-success">Aprobar</a>
+                                <a href="{{ path('app_moderation_reject', {'id': meme.id}) }}" class="btn btn-danger">Rechazar</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
